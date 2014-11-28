@@ -1,6 +1,6 @@
-import datetime
+import datetime, re, json
 import redis
-from flask import Flask
+from flask import Flask, render_template, jsonify, request, abort
 from flask.views import MethodView
 
 # flask config.
@@ -14,31 +14,41 @@ class Index(MethodView):
     '''index.'''
 
     def get(self):
-        return 'index!'
+        return render_template('index.html')
 
 class AlarmAPI(MethodView):
     '''alarm api.'''
 
     def get(self):
-        '''get alarm current alarm.''' 
-        return 'alarm!'
+        '''get alarm current alarm.'''
+        alarm = r.get('alarm')
+        if alarm:
+            tobj = datetime.time(*map(int, re.split('[^\d]', alarm)[:-1]))
+            response = {'hour': tobj.hour, 'minute': tobj.minute}
+        else:
+            response = {}
+        return jsonify(response)
 
     def post(self):
         '''post alarm.'''
-        d = {'hour': 13, 'minute': 28}
-        now  = datetime.datetime.now()
-        hours = d['hour'] - now.hour
-        minutes = d['minute'] - now.minute
-        if hours < 0: hours += 24
-        if minutes < 0: minutes += 60
-        seconds = hours*3600 + minutes*60 - now.second
-        alarm = now + datetime.timedelta(seconds=seconds)
+        d = json.loads(request.data)
+        try:
+            d = {key: int(value) for (key, value) in d.items()}
+        except ValueError:
+            abort(403)
+        try:
+            alarm = datetime.time(hour=d['hour'], minute=d['minute'])
+        except ValueError:
+            abort(403)
         r.set('alarm', alarm.isoformat())
-        return 'Alarm set!\n'
+        res = 'Alarm set for %r !\n' % alarm.isoformat()
+        return res
 
     def delete(self):
         '''delete alarm.'''
-        return 'NYI\n'
+        res = 'Alarm %r deleted\n' % r.get('alarm')
+        r.delete('alarm')
+        return res
 
 # register url rules.
 app.add_url_rule('/', view_func=Index.as_view('index'))

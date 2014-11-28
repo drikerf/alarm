@@ -1,0 +1,16 @@
+html {}
+body {
+    background-color: grey;
+}
+
+.timegroup {
+    text-align: center;
+}
+.time, .time:hover, .time:active, .time:focus {
+    background-color: transparent;
+    border: none;
+    outline: 0;
+    font-size: 72px;
+    width: 100px;
+}
+
