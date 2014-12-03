@@ -6,6 +6,7 @@ body {
 .timegroup {
     text-align: center;
 }
+
 .time, .time:hover, .time:active, .time:focus {
     background-color: transparent;
     border: none;
@@ -14,3 +15,6 @@ body {
     width: 100px;
 }
 
+#deleteAlarm {
+    display: none;
+}

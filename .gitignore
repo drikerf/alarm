@@ -1,0 +1,5 @@
+.DS_Store
+*.pyc
+sound.mp3
+dump.rdb
+venv/

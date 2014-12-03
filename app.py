@@ -21,10 +21,11 @@ class AlarmAPI(MethodView):
 
     def get(self):
         '''get alarm current alarm.'''
-        alarm = r.get('alarm')
+        alarm = r.hgetall('alarm')
         if alarm:
-            tobj = datetime.time(*map(int, re.split('[^\d]', alarm)[:-1]))
-            response = {'hour': tobj.hour, 'minute': tobj.minute}
+            tobj = datetime.time(*map(int, re.split('[^\d]', alarm['time'])[:-1]))
+            response = {'hour': tobj.hour, 'minute': tobj.minute, 
+                        'active': alarm['active']}
         else:
             response = {}
         return jsonify(response)
@@ -40,13 +41,13 @@ class AlarmAPI(MethodView):
             alarm = datetime.time(hour=d['hour'], minute=d['minute'])
         except ValueError:
             abort(403)
-        r.set('alarm', alarm.isoformat())
+        r.hmset('alarm', {'time': alarm.isoformat(), 'active': 0})    
         res = 'Alarm set for %r !\n' % alarm.isoformat()
         return res
 
     def delete(self):
         '''delete alarm.'''
-        res = 'Alarm %r deleted\n' % r.get('alarm')
+        res = 'Alarm %r deleted\n' % r.hgetall('alarm')
         r.delete('alarm')
         return res
 

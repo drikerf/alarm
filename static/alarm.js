@@ -3,7 +3,6 @@
 var getAlarm = function() {
     request = new XMLHttpRequest();
     request.open('GET', '/alarm', true);
-
     request.onload = function() {
         if (request.status >= 200 && request.status < 400) {
             // Success!
@@ -13,6 +12,7 @@ var getAlarm = function() {
             if (data.hour) {
                 console.log('There was data!');
                 dispAlarm(data);
+                dispDelete();
             } else {
                 console.log('There was empty data!');
             }
@@ -20,11 +20,9 @@ var getAlarm = function() {
             // Server responded with error.
         }
     };
-
     request.onerror = function() {
         // Problem with connection.
     };
-
     request.send();
 };
 
@@ -33,6 +31,17 @@ var dispAlarm = function(time) {
     console.log('Setting alarm for ' + data.hour + ' hours and ' + data.minute + ' minutes');
     document.getElementById('hour').value = data.hour;
     document.getElementById('minute').value = data.minute;
+};
+
+// Display delete button.
+var dispDelete = function() {
+    document.getElementById('deleteAlarm').style.display = 'block';
+};
+
+// Hide delete button.
+var hideDelete = function() {
+    document.getElementById('deleteAlarm').style.display = 'none';
+
 };
 
 // Set alarm.
@@ -50,7 +59,8 @@ var setAlarm = function() {
     request.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
     request.onload = function() {
         if (request.status >= 200 && request.status < 400) {
-            console.log('POST status OK');      
+            console.log('POST status OK');
+            dispDelete();
         } else {
             console.log('Server responded with error code: ' + request.status);
         }
@@ -61,8 +71,30 @@ var setAlarm = function() {
     request.send(JSON.stringify(data));
 };
 
+// Delete alarm.
+var deleteAlarm = function() {
+    request.open('DELETE', '/alarm', true);
+    request.onload = function() {
+        if (request.status >= 200 && request.status < 400) {
+            // Success!
+            console.log('Server responded ok! Alarm deleted.');
+            hideDelete();
+        } else {
+            // Server responded with error.
+        }
+    };
+    request.onerror = function() {
+        // Problem with connection.
+    };
+    request.send();
+};
+
+// Set event listeners.
 document.getElementById('setAlarm').onclick = function() {
     setAlarm();
+};
+document.getElementById('deleteAlarm').onclick = function() {
+    deleteAlarm();
 };
 
 // Init.
